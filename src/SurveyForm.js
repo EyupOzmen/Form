@@ -1,43 +1,24 @@
-import React, { useState } from "react";
-
-import {
-  requiredValidation,
-  minimumValidation,
-  maximumValidation,
-} from "./validations";
+import React, { useState} from "react";
 
 const SurveyForm = () => {
-  const initialValues = {
-    data: {
-      value: "",
-      validations: [
-        requiredValidation,
-        maximumValidation(10),
-        minimumValidation(3),
-      ],
-    },
-    min: {
-      value: "",
-      validations: [requiredValidation],
-    },
-    max: {
-      value: "",
-      validations: [requiredValidation],
-    },
-  };
 
-  const [fields, setFields] = useState(initialValues);
+  const [data,setData] = useState()
+  const [min,setMin] = useState()
+  const [max,setMax] = useState()
 
-  const [validation, setValidation] = useState("");
+  const [validation, setValidation] = useState("integer");
   const [shape, setShape] = useState({ step: 1, pattern: "[0-9]*" });
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmittable, setIsSubmittable] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(true);
+  
+
+  const [dataErr,setDataErr] = useState({})
+  const [minErr,setMinErr] = useState({})
+  const [maxErr,setMaxErr] = useState({})
 
   const handleValidationChange = (event) => {
     const { value } = event.target;
 
-    setValidation(value);
     if (value === "integer" || value === "integer-range") {
       setShape({
         step: 1,
@@ -46,56 +27,138 @@ const SurveyForm = () => {
     } else {
       setShape({
         step: 0.1,
-        pattern: "[0-9]+([,][0-9]+)?",
+        pattern: "[0-9]+([.][0-9]+)?",
       });
     }
-    setFields(initialValues);
+    setData();
+    setMin();
+    setMax();
+    setValidation(value);
+    
   };
 
-  const handleChange = (event) => {
-    const { value, name } = event.target;
+  const handleDataChange = (event) => {
+    const { value } = event.target;
 
-    let newFields = { ...fields };
-    newFields[name].value = value;
-    newFields = setValidationErrors(newFields);
-    setIsSubmittable(!hasErrors(newFields));
-    setFields(newFields);
+    setData(value);
+  };
+
+  const handleMinChange = (event) => {
+    const { value} = event.target;
+
+   setMin(value)
+  };
+
+  const handleMaxChange = (event) => {
+    const { value} = event.target;
+
+   setMax(value)
   };
 
   const handleSubmit = (event) => {
     event.preventDefault();
     setIsSubmitting(true);
-    setTimeout(() => {
-      console.log(fields);
+
+    const isValid = formValidation();
+    console.log(isValid)
+    if(isValid){
       setIsSubmitting(false);
-    });
+      console.log(data)
+      
+      
+      setData("");
+      setMin("");
+      setMax("");
+    }
+    setIsSubmitting(true)
   };
+  
+  const formValidation = () => {
+     const dataErr = {};
+     const minErr = {};
+     const maxErr = {};
 
-  const hasErrors = (fields) => {
-    return (
-      Object.keys(fields)
-        .map((field) => fields[field].errors.length)
-        .reduce((acc, errorCount) => acc + errorCount, 0) > 0
-    );
-  };
+     let isValid = true;
 
-  const setValidationErrors = (fields) => {
-    Object.keys(fields).forEach((field) => {
-      fields[field].errors = errorsForField(field);
-    });
+     if(  !data ){
+       dataErr.required = "Required"
+       isValid=false;
+     }
 
-    return fields;
-  };
+     if( validation === "integer-range" || validation === "decimal-range"){
+       if(parseFloat(data) < min){
+         dataErr.minimum =  `Must be at least ${min} `
+         isValid = false;
+       }
+       if(parseFloat(data)  > max){
+         dataErr.maximum = `Must be equal or lower than ${max} `
+         isValid = false;
+       }
+     }
+     if( validation === "integer-range" || validation === "decimal-range"){
+        if(!min){
+          minErr.required = "Required"
+          isValid=false;
+        }
+        if(!max){
+          maxErr.required =  "Required"
+          isValid=false;
+        }
+     }
+     if(validation === "decimal-range" || validation === "decimal"){
+       if(data%1 == 0){
+         console.log(data)
+         dataErr.decimal = "Must be decimal!"
+         isValid=false;
+       }
+       if(min%1 == 0){
+         console.log(min)
+        minErr.decimal = "Must be decimal!"
+        isValid=false;
+      }
+      if(max%1 == 0){
+        console.log(max)
+        maxErr.decimal = "Must be decimal!"
+        isValid=false;
+      }
+     }
+     if(max < min ){
+       maxErr.bigger = "Max must be greater than min"
+       isValid=false;
+     }
+     if(validation === "integer-range" || validation === "integer"){
+      console.log(data)
+     
+      if(data%1 != 0){
+        console.log(data)
+        dataErr.decimal = "Must be integer!"
+        setData()
+        isValid=false;
+      }
+      if(min%1 != 0){
+      console.log(min)
+       minErr.decimal = "Must be integer!"
+       isValid=false;
+     }
+     if(max%1 != 0){
+       console.log(max)
+       maxErr.decimal = "Must be integer!"
+       isValid=false;
+     }
+    }
+    if(max < min ){
+      console.log(max)
+      console.log(min)
+      maxErr.bigger = "Max must be greater than min"
+      isValid=false;
+    }
+     setDataErr(dataErr);
+     setMaxErr(maxErr);
+     setMinErr(minErr);
 
-  const errorsForField = (field) => {
-    return fields[field].validations
-      .map((validation) => {
-        const { isValid, message } = validation(fields[field].value);
-        return isValid ? "" : message;
-      })
-      .filter((value) => value.length > 0);
-  };
-
+     return isValid;
+  }
+ 
   return (
     <>
       <h1>Survey Form</h1>
@@ -129,19 +192,13 @@ const SurveyForm = () => {
                 pattern={shape.pattern}
                 step={shape.step}
                 inputMode="numeric"
-                onChange={handleChange}
-                value={fields.min.value}
+                onChange={handleMinChange}
+                value={min}
                 placeholder="Minimum"
               />
-              <small id="dataErrors" className="form-text text-danger">
-                {fields.min.errors &&
-                  fields.min.errors.map((error) => (
-                    <span key={error}>
-                      {error}
-                      <br />
-                    </span>
-                  ))}
-              </small>
+              {Object.keys(minErr).map((key) => {
+                return <div key={key} style={{color:"red"}}>{minErr[key]}</div>
+              })}
               <br />
               <br />
               <input
@@ -154,19 +211,13 @@ const SurveyForm = () => {
                 pattern={shape.pattern}
                 step={shape.step}
                 inputMode="numeric"
-                onChange={handleChange}
-                value={fields.max.value}
+                onChange={handleMaxChange}
+                value={max}
                 placeholder="Maximum"
               />
-              <small id="dataErrors" className="form-text text-danger">
-                {fields.max.errors &&
-                  fields.max.errors.map((error) => (
-                    <span key={error}>
-                      {error}
-                      <br />
-                    </span>
-                  ))}
-              </small>
+               {Object.keys(maxErr).map((key) => {
+                return <div key={key} style={{color:"red"}}>{maxErr[key]}</div>
+              })}
             </div>
           ) : null}
           <br />
@@ -185,8 +236,8 @@ const SurveyForm = () => {
               pattern={shape.pattern}
               step={shape.step}
               inputMode="numeric"
-              onChange={handleChange}
-              value={fields.data.value}
+              onChange={handleDataChange}
+              value={data}
               placeholder="Enter data"
             />
             <br/>
@@ -194,19 +245,13 @@ const SurveyForm = () => {
               We'll never share your data with anyone else.
             </small>
             <br/>
-            <small id="dataErrors" className="form-text text-danger">
-              {fields.data.errors &&
-                fields.data.errors.map((error) => (
-                  <span key={error}>
-                    {error}
-                    <br />
-                  </span>
-                ))}
-            </small>
+            {Object.keys(dataErr).map((key) => {
+                return <div key={key} style={{color:"red"}}>{dataErr[key]}</div>
+              })}
           </div>
         </div>
         <br />
-        <button className="button" type="submit" disabled={isSubmitting || !isSubmittable}>
+        <button className="button" type="submit" disabled={!isSubmitting}>
           Submit
         </button>
       </form>
