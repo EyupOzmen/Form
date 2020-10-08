@@ -46,7 +46,7 @@ const SurveyForm = () => {
   const handleMinChange = (event) => {
     const { value} = event.target;
 
-   setMin(value)
+    setMin(value)
   };
 
   const handleMaxChange = (event) => {
@@ -65,18 +65,19 @@ const SurveyForm = () => {
       setIsSubmitting(false);
       console.log(data)
       
-      
       setData("");
-      setMin("");
+     setMin("");
       setMax("");
+     
     }
+    
     setIsSubmitting(true)
   };
 
-  useEffect(() => {
-    formValidation()
+  // useEffect(() => {
+  //   formValidation()
 
-  },[data])
+  // },[data])
   
   const formValidation = () => {
      const dataErr = {};
@@ -95,7 +96,7 @@ const SurveyForm = () => {
          dataErr.minimum =  `Must be at least ${min} `
          isValid = false;
        }
-       if(data  > max){
+      else if(data  > max){
          dataErr.maximum = `Must be equal or lower than ${max} `
          isValid = false;
        }
@@ -105,52 +106,52 @@ const SurveyForm = () => {
           minErr.required = "Required"
           isValid=false;
         }
-        if(!max){
+       else if(!max){
           maxErr.required =  "Required"
           isValid=false;
         }
      }
      if(validation === "decimal-range" || validation === "decimal"){
-       if(data%1 == 0){
+       if(data%1 === 0){
          console.log(data)
          dataErr.decimal = "Must be decimal!"
          isValid=false;
        }
-       if(min%1 == 0){
+     else if(min%1 === 0){
          console.log(min)
          minErr.decimal = "Must be decimal!"
          isValid=false;
       }
-      if(max%1 == 0){
+     else if(max%1 === 0){
         console.log(max)
         maxErr.decimal = "Must be decimal!"
         isValid=false;
       }
      }
-     if(max < min ){
-       maxErr.bigger = "Max must be greater than min"
-       isValid=false;
-     }
+    //  if(max < min ){
+    //    maxErr.bigger = "Max must be greater than min"
+    //    isValid=false;
+    //  }
      if(validation === "integer-range" || validation === "integer"){
       console.log(data)
      
-      if(data%1 != 0){
+      if(data%1 !== 0){
         console.log(data)
         dataErr.decimal = "Must be integer!"
         isValid=false;
       }
-      if(min%1 != 0){
+     else if(min%1 !== 0){
       console.log(min)
        minErr.decimal = "Must be integer!"
        isValid=false;
      }
-     if(max%1 != 0){
+   else if(max%1 !== 0){
        console.log(max)
        maxErr.decimal = "Must be integer!"
        isValid=false;
      }
     }
-    if(max < min ){
+    if(parseFloat(max)  < parseFloat(min) ){
       console.log(max)
       console.log(min)
       maxErr.bigger = "Max must be greater than min"
