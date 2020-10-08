@@ -1,10 +1,10 @@
-import React, { useState} from "react";
+import React, { useState,useEffect} from "react";
 
 const SurveyForm = () => {
 
-  const [data,setData] = useState()
-  const [min,setMin] = useState()
-  const [max,setMax] = useState()
+  const [data,setData] = useState("")
+  const [min,setMin] = useState("")
+  const [max,setMax] = useState("")
 
   const [validation, setValidation] = useState("integer");
   const [shape, setShape] = useState({ step: 1, pattern: "[0-9]*" });
@@ -30,9 +30,9 @@ const SurveyForm = () => {
         pattern: "[0-9]+([.][0-9]+)?",
       });
     }
-    setData();
-    setMin();
-    setMax();
+    setData("");
+    setMin("");
+    setMax("");
     setValidation(value);
     
   };
@@ -72,6 +72,11 @@ const SurveyForm = () => {
     }
     setIsSubmitting(true)
   };
+
+  useEffect(() => {
+    formValidation()
+
+  },[data])
   
   const formValidation = () => {
      const dataErr = {};
@@ -86,11 +91,11 @@ const SurveyForm = () => {
      }
 
      if( validation === "integer-range" || validation === "decimal-range"){
-       if(parseFloat(data) < min){
+       if(data < min){
          dataErr.minimum =  `Must be at least ${min} `
          isValid = false;
        }
-       if(parseFloat(data)  > max){
+       if(data  > max){
          dataErr.maximum = `Must be equal or lower than ${max} `
          isValid = false;
        }
@@ -113,8 +118,8 @@ const SurveyForm = () => {
        }
        if(min%1 == 0){
          console.log(min)
-        minErr.decimal = "Must be decimal!"
-        isValid=false;
+         minErr.decimal = "Must be decimal!"
+         isValid=false;
       }
       if(max%1 == 0){
         console.log(max)
@@ -132,7 +137,6 @@ const SurveyForm = () => {
       if(data%1 != 0){
         console.log(data)
         dataErr.decimal = "Must be integer!"
-        setData()
         isValid=false;
       }
       if(min%1 != 0){
