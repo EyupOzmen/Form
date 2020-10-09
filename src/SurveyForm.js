@@ -25,12 +25,12 @@ const SurveyForm = () => {
     if (value === "integer" || value === "integer-range") {
       setShape({
         step: 1,
-        pattern: "[0-9]*",
+        pattern: "/^\d+$/",
       });
     } else {
       setShape({
         step: 0.1,
-        pattern: "[0-9]+([.][0-9]+)?",
+        pattern: "/^\d{0,5}\.\d{0,2}$/",
       });
     }
     setData("");
@@ -160,11 +160,11 @@ const SurveyForm = () => {
     // console.log(isValid)
     // if(isValid){
     //   setIsSubmitting(false);
-    //   console.log(data)
+      console.log(data)
       
-    //   setData("");
-    //   setMin(1);
-    //   setMax(32);
+      setData("");
+      setMin(1);
+      setMax(32);
      
     // }
     
@@ -195,6 +195,7 @@ const SurveyForm = () => {
           {validation === "integer-range" || validation === "decimal-range" ? (
             <div>
               <input
+                required
                 autoComplete="off"
                 className="form-control"
                 id="min"
@@ -213,6 +214,7 @@ const SurveyForm = () => {
               <br />
               <br />
               <input
+                required
                 autoComplete="off"
                 className="form-control"
                 id="max"
@@ -241,6 +243,7 @@ const SurveyForm = () => {
             <br />
             <br />
             <input
+              required
               autoComplete="off"
               className="data"
               id="data"
